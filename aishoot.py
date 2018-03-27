@@ -182,11 +182,11 @@ class AIShoot:
                 guess_x = last_hit_x - 1
                 guess_y = last_hit_y + 1
             elif direction == 1:
-                guess_x = last_hit_x - 1
+                guess_x = last_hit_x - 2
                 guess_y = last_hit_y - 1
             elif direction == 2:
                 guess_x = last_hit_x - 1
-                guess_y = last_hit_y - 1
+                guess_y = last_hit_y - 2
             elif direction == 3:
                 guess_x = last_hit_x + 1
                 guess_y = last_hit_y - 1
