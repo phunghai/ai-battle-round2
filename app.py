@@ -196,11 +196,11 @@ def shoot():
             ship_hitting_position = session["ship_hitting_position"]
             last_hit_postion = session["hit_ship_position"]
             print(ship_hitting_position,last_hit_postion)
-            guess_direction = utils.guess_ship_orientation(ship_hitting_position)
+            guess_direction = utils.guess_ship_orientation_v1(ship_hitting_position, last_hit_postion)
             print(guess_direction)
 
 
-            shoot_info = aishoot.scan_shoot(opponent_board, last_hit_postion[0], last_hit_postion[1], guess_direction,
+            shoot_info = aishoot.scan_shoot_v1(opponent_board, last_hit_postion[0], last_hit_postion[1], guess_direction,
                                ship_hitting_position)
             guess_pos = shoot_info["guess_pos"]
             print(guess_pos)
@@ -272,8 +272,10 @@ def notify():
                     print("HIT: change circle => line")
                     session[Constant.SESSION_KEY_AI_STAGE] = Constant.AI_STAGE_LINE_SHOOT
                 elif ai_stage == Constant.AI_STAGE_SCAN_SHOOT:
-                    print("HIT: change scan => line")
-                    session[Constant.SESSION_KEY_AI_STAGE] = Constant.AI_STAGE_LINE_SHOOT
+                    # if kill ship then change shoot way else keep scan shoot
+                    if len(sunk_ships) > 0:
+                        print("HIT: change scan => line")
+                        session[Constant.SESSION_KEY_AI_STAGE] = Constant.AI_STAGE_LINE_SHOOT
 
 
                 # analysis sunk ship
@@ -281,37 +283,15 @@ def notify():
                 if len(sunk_ships) > 0:
                     for sunk_ship in sunk_ships:
                         print("HIT: has sunk ship")
+                        # session.pop("hit_ship_position", None)
+                        # session.pop("ship_hitting_position", None)
                         session["hit_ship_position"] = []
                         session["ship_hitting_position"] = []
+                        print(session["ship_hitting_position"])
                         # if ship is destroyed completely then reset ai_stage to random
                         session[Constant.SESSION_KEY_AI_STAGE] = Constant.AI_STAGE_RANDOM_SHOOT
 
                         opponent_board = utils.update_board(sunk_ship["coordinates"], opponent_board)
-
-
-                # for sunk_ship in sunk_ships:
-                #     if len(session["sunk_ships_position"]) == 0:
-                #         session["hit_ship_position"] = []
-                #         # if ship is destroyed completely then reset ai_stage to random
-                #         session[Constant.SESSION_KEY_AI_STAGE] = Constant.AI_STAGE_RANDOM_SHOOT
-                #
-                #         opponent_board = update_board(sunk_ship["coordinates"], opponent_board)
-                #         session["sunk_ships_position"].append(sunk_ship["coordinates"])
-                #
-                #         session["cv_ship_position"] = []
-                #     else:
-                #         if sunk_ship["coordinates"] not in  session["sunk_ships_position"]:
-                #             print("HIT: has sunk ship")
-                #             print(sunk_ship["type"], sunk_ship["coordinates"])
-                #             print("update SUNK SHIP")
-                #             # change Target Mode to Hunter mode
-                #             session["hit_ship_position"] = []
-                #             # if ship is destroyed completely then reset ai_stage to random
-                #             session[Constant.SESSION_KEY_AI_STAGE] = Constant.AI_STAGE_RANDOM_SHOOT
-                #
-                #             opponent_board = update_board(sunk_ship["coordinates"], opponent_board)
-                #             session["sunk_ships_position"].append(sunk_ship["coordinates"])
-                #             print(opponent_board)
                 print(" HIT: ai_stage in session", session[Constant.SESSION_KEY_AI_STAGE])
             elif status == Constant.SHOT_STATUS_MISS:
                 print('Oh no, miss shot. Try again')

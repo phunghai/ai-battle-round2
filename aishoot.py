@@ -160,3 +160,45 @@ class AIShoot:
 
         guess_pos = [guess_x, guess_y]
         return {"guess_pos": guess_pos, "direction": direction, "ai_stage": Constant.AI_STAGE_SCAN_SHOOT}
+
+    def scan_shoot_v1(self, board, last_hit_x, last_hit_y, direction, ship_hitting_postion):
+        utils = Utils()
+        guess_x = last_hit_x
+        guess_y = last_hit_y
+
+        last_hit_len = len(ship_hitting_postion)
+        # shoot opposite
+        if last_hit_len < 4:
+            if direction == 0:
+                guess_y = last_hit_y + last_hit_len
+            elif direction == 1:
+                guess_x = last_hit_x - last_hit_len
+            elif direction == 2:
+                guess_y = last_hit_y - last_hit_len
+            elif direction == 3:
+                guess_x = last_hit_x + last_hit_len
+        elif last_hit_len == 4: #CV
+            if direction == 0:
+                guess_x = last_hit_x - 1
+                guess_y = last_hit_y + 1
+            elif direction == 1:
+                guess_x = last_hit_x - 1
+                guess_y = last_hit_y - 1
+            elif direction == 2:
+                guess_x = last_hit_x - 1
+                guess_y = last_hit_y - 1
+            elif direction == 3:
+                guess_x = last_hit_x + 1
+                guess_y = last_hit_y - 1
+
+        if guess_x < 0 or guess_x > Constant.DEFAULT_BOARD_WIDTH or guess_y < 0 or guess_y > Constant.DEFAULT_BOARD_HEIGHT:
+            shoot_info = self.random_shoot(board)
+            return {"guess_pos": shoot_info["guess_pos"], "direction": shoot_info["direction"], "ai_stage": shoot_info["ai_stage"]}
+        elif not utils.is_ocean(guess_x, guess_y, board):
+            shoot_info = self.circle_shoot(board, last_hit_x, last_hit_y)
+            return {"guess_pos": shoot_info["guess_pos"], "direction": shoot_info["direction"],
+                    "ai_stage": Constant.AI_STAGE_CIRCLE_SHOOT}
+
+
+        guess_pos = [guess_x, guess_y]
+        return {"guess_pos": guess_pos, "direction": direction, "ai_stage": Constant.AI_STAGE_SCAN_SHOOT}

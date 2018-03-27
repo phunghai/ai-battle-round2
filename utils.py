@@ -135,6 +135,46 @@ class Utils:
             return 2
         return -1
 
+    def guess_ship_orientation_v1(self, ship_hit_possion, last_hit_position):
+        previous_hit = ship_hit_possion[len(ship_hit_possion) - 2]
+
+        if last_hit_position[0] < previous_hit[0] and last_hit_position[1] == previous_hit[1]:
+            return 3
+        elif last_hit_position[0] > previous_hit[0] and last_hit_position[1] == previous_hit[1]:
+            return 1
+        elif last_hit_position[1] > previous_hit[1] and last_hit_position[0] == previous_hit[0]:
+            return 2
+        elif last_hit_position[1] < previous_hit[1] and last_hit_position[0] == previous_hit[0]:
+            return 0
+
+        return -1
+
+        # x_arr = []
+        # y_arr = []
+        # for postion in ship_hit_possion:
+        #     x_arr.append(postion[0])
+        #     y_arr.append(postion[1])
+
+        
+
+
+        # print(x_arr,y_arr)
+        # # check ascendining
+        # sort_x_arr_asc = sorted(x_arr, reverse=False)
+        # sort_x_arr_desc = sorted(x_arr, reverse=True)
+        # sort_y_arr_asc = sorted(y_arr, reverse=False)
+        # sort_y_arr_desc = sorted(y_arr, reverse=True)
+        # if sort_x_arr_asc == self.remove_duplicates(x_arr):
+        #     #horizinal
+        #     return 3 #EAST
+        # elif sort_x_arr_desc == self.remove_duplicates(x_arr):
+        #     return 1
+        # elif sort_y_arr_asc == self.remove_duplicates(y_arr):
+        #     return 0
+        # elif sort_y_arr_desc == self.remove_duplicates(y_arr):
+        #     return 2
+        # return -1
+
     def remove_duplicates(self, lst):
         seen = set()
         res = []
