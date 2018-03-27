@@ -199,9 +199,10 @@ def shoot():
             guess_direction = utils.guess_ship_orientation_v1(ship_hitting_position, last_hit_postion)
             print(guess_direction)
 
+            print(session["previous_status"])
 
             shoot_info = aishoot.scan_shoot_v1(opponent_board, last_hit_postion[0], last_hit_postion[1], guess_direction,
-                               ship_hitting_position)
+                               ship_hitting_position, session["previous_status"])
             guess_pos = shoot_info["guess_pos"]
             print(guess_pos)
             guess_x = guess_pos[0]
