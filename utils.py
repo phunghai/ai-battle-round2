@@ -1,6 +1,7 @@
 from random import randint
 from constant import Constant
-from ships import *
+from models import Carrier, Battleship, Cruiser, Destroyer, Oilrig
+
 
 class Utils:
     def random_y(self, is_vertical, size, height, ship_type):
@@ -28,12 +29,13 @@ class Utils:
             else:
                 return randint(size - 1, Constant.DEFAULT_BOARD_WIDTH - 1)
 
-    def is_ocean(self, x, y, b):  # true if ocean
+    def is_ocean(self, x, y, board):  # true if ocean
         if y < 0 or y >= Constant.DEFAULT_BOARD_HEIGHT:
             return 0
         elif x < 0 or x >= Constant.DEFAULT_BOARD_WIDTH:
             return 0
-        if b[y][x] == Constant.OCEAN:
+
+        if board[y][x] == Constant.OCEAN:
             return 1
         else:
             return 0
@@ -41,52 +43,50 @@ class Utils:
     def make_ship(self, ship_type):
         if ship_type == Constant.SHIP_TYPE_CARRIER:
             make_ship = Carrier()
-        if ship_type == Constant.SHIP_TYPE_BATTLE_SHIP:
+        elif ship_type == Constant.SHIP_TYPE_BATTLE_SHIP:
             make_ship = Battleship()
-        if ship_type == Constant.SHIP_TYPE_CRUISER:
+        elif ship_type == Constant.SHIP_TYPE_CRUISER:
             make_ship = Cruiser()
-        if ship_type == Constant.SHIP_TYPE_DESTROYER:
+        elif ship_type == Constant.SHIP_TYPE_DESTROYER:
             make_ship = Destroyer()
-        if ship_type == Constant.SHIP_TYPE_OIL_RIG:
+        elif ship_type == Constant.SHIP_TYPE_OIL_RIG:
             make_ship = Oilrig()
+        else:
+            make_ship = Carrier()
 
         return make_ship
 
-
     def place_ship(self, ship, board):
+        """
+        Placing a ship on game board
+        :param ship:
+        :param board:
+        :return:
+        """
         is_vertical = randint(0, 1) # vertical ship if true
         occupied = True
         ship_type = ship["type"]
         ship_info = Constant.SHIPS_INFO[ship_type]
         size = ship_info["width"]
         height = ship_info["height"]
-        print("is_vertical=", is_vertical)
-        print("shiptype=", ship_type)
 
-        #TODO
-        if ship_type == Constant.SHIP_TYPE_CARRIER:
-            make_ship = Carrier()
-        if ship_type == Constant.SHIP_TYPE_BATTLE_SHIP:
-            make_ship = Battleship()
-        if ship_type == Constant.SHIP_TYPE_CRUISER:
-            make_ship = Cruiser()
-        if ship_type == Constant.SHIP_TYPE_DESTROYER:
-            make_ship = Destroyer()
-        if ship_type == Constant.SHIP_TYPE_OIL_RIG:
-            make_ship = Oilrig()
+        # making new ship based on ship type
+        ship = self.make_ship(ship_type)
 
+        ship_x = 0
+        ship_y = 0
         while occupied:
             occupied = False
             ship_x = self.random_x(is_vertical, size, height, ship_type)
             ship_y = self.random_y(is_vertical, size, height, ship_type)
 
-            if make_ship.canPlace(ship_x, ship_y, board, is_vertical) is False:
+            if ship.can_place(ship_x, ship_y, board, is_vertical) is False:
                 print('can not place', ship_x, ship_y)
                 occupied = True
 
         print("ship_x", ship_x, "ship_y", ship_y)
-        #Place ship on boards
-        ship_coordinates = make_ship.getShip(ship_x, ship_y, is_vertical)
+        # place ship on game board
+        ship_coordinates = ship.get_ship(ship_x, ship_y, is_vertical)
 
         for ship_coordinate in ship_coordinates:
             board[ship_coordinate[1]][ship_coordinate[0]] = ship_type
@@ -104,28 +104,27 @@ class Utils:
         return board
 
     def check_ship_orientation(self, direction):
-        if direction == 0 or direction == 1:
+        if direction == Constant.SHOOT_DIRECTION_ABOVE or direction == Constant.SHOOT_DIRECTION_RIGHT:
             return Constant.VERTICAL
-        elif direction == 1 or direction == 3:
-            return Constant.HORIZONAL
+        elif direction == Constant.SHOOT_DIRECTION_RIGHT or direction == Constant.SHOOT_DIRECTION_LEFT:
+            return Constant.HORIZONTAL
 
         return -1 #unknow
 
-    def guess_ship_orientation(self, hit_possion):
+    def guess_ship_orientation(self, hit_position):
         x_arr = []
         y_arr = []
-        for postion in hit_possion:
-            x_arr.append(postion[0])
-            y_arr.append(postion[1])
+        for position in hit_position:
+            x_arr.append(position[0])
+            y_arr.append(position[1])
 
-        print(x_arr,y_arr)
         # check ascendining
         sort_x_arr_asc = sorted(x_arr, reverse=False)
         sort_x_arr_desc = sorted(x_arr, reverse=True)
         sort_y_arr_asc = sorted(y_arr, reverse=False)
         sort_y_arr_desc = sorted(y_arr, reverse=True)
         if sort_x_arr_asc == self.remove_duplicates(x_arr):
-            #horizinal
+            # horizintal
             return 3 #EAST
         elif sort_x_arr_desc == self.remove_duplicates(x_arr):
             return 1
@@ -148,32 +147,6 @@ class Utils:
             return 0
 
         return -1
-
-        # x_arr = []
-        # y_arr = []
-        # for postion in ship_hit_possion:
-        #     x_arr.append(postion[0])
-        #     y_arr.append(postion[1])
-
-        
-
-
-        # print(x_arr,y_arr)
-        # # check ascendining
-        # sort_x_arr_asc = sorted(x_arr, reverse=False)
-        # sort_x_arr_desc = sorted(x_arr, reverse=True)
-        # sort_y_arr_asc = sorted(y_arr, reverse=False)
-        # sort_y_arr_desc = sorted(y_arr, reverse=True)
-        # if sort_x_arr_asc == self.remove_duplicates(x_arr):
-        #     #horizinal
-        #     return 3 #EAST
-        # elif sort_x_arr_desc == self.remove_duplicates(x_arr):
-        #     return 1
-        # elif sort_y_arr_asc == self.remove_duplicates(y_arr):
-        #     return 0
-        # elif sort_y_arr_desc == self.remove_duplicates(y_arr):
-        #     return 2
-        # return -1
 
     def remove_duplicates(self, lst):
         seen = set()
