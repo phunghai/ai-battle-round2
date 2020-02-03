@@ -11,7 +11,7 @@ app.secret_key="my secret key"
 
 
 @app.route("/")
-def hello():
+def default():
     return "Hello World!"
 
 
