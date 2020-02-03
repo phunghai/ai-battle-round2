@@ -2,6 +2,7 @@ from random import randint
 from constant import Constant
 from utils import Utils
 
+
 class AIShoot:
     def random_shoot(self, board):
         utils = Utils()
@@ -16,27 +17,27 @@ class AIShoot:
 
     def circle_shoot(self, board, start_x, start_y):
         utils = Utils()
-        directions = [0,1,2,3] # 0: above, 1: right, 2: bottom, 3: left
+        directions = [Constant.SHOOT_DIRECTION_ABOVE, Constant.SHOOT_DIRECTION_RIGHT, Constant.SHOOT_DIRECTION_BOTTOM, Constant.SHOOT_DIRECTION_LEFT] # 0: above, 1: right, 2: bottom, 3: left
 
         if start_x == 0:
-            directions.remove(3)
+            directions.remove(Constant.SHOOT_DIRECTION_LEFT) # can not shot at left side
         elif not utils.is_ocean(start_x - 1, start_y, board):
-            directions.remove(3)
+            directions.remove(Constant.SHOOT_DIRECTION_LEFT)
 
         if start_x == Constant.DEFAULT_BOARD_WIDTH - 1:
-            directions.remove(1)
+            directions.remove(Constant.SHOOT_DIRECTION_RIGHT)
         elif not utils.is_ocean(start_x + 1, start_y, board):
-            directions.remove(1)
+            directions.remove(Constant.SHOOT_DIRECTION_RIGHT)
 
         if start_y == 0:
-            directions.remove(0)
+            directions.remove(Constant.SHOOT_DIRECTION_ABOVE)
         elif not utils.is_ocean(start_x, start_y - 1, board):
-            directions.remove(0)
+            directions.remove(Constant.SHOOT_DIRECTION_ABOVE)
 
         if start_y == Constant.DEFAULT_BOARD_HEIGHT - 1:
-            directions.remove(2)
+            directions.remove(Constant.SHOOT_DIRECTION_BOTTOM)
         elif not utils.is_ocean(start_x, start_y + 1, board):
-            directions.remove(2)
+            directions.remove(Constant.SHOOT_DIRECTION_BOTTOM)
 
         direction = -1
         guess_x = start_x
@@ -46,13 +47,14 @@ class AIShoot:
             guess_spot = randint(0, len(directions) - 1)
             direction = directions[guess_spot]
 
-        if direction == 0:
+        # base on shoot direction to guess next position
+        if direction == Constant.SHOOT_DIRECTION_ABOVE:
             guess_y = start_y - 1
-        elif direction == 1:
+        elif direction == Constant.SHOOT_DIRECTION_RIGHT:
             guess_x = start_x + 1
-        elif direction == 2:
+        elif direction == Constant.SHOOT_DIRECTION_BOTTOM:
             guess_y = start_y + 1
-        elif direction == 3:
+        elif direction == Constant.SHOOT_DIRECTION_LEFT:
             guess_x = start_x - 1
 
         if not utils.is_ocean(guess_x, guess_y, board):
@@ -67,13 +69,13 @@ class AIShoot:
         guess_x = start_x
         guess_y = start_y
 
-        if direction == 0:
+        if direction == Constant.SHOOT_DIRECTION_ABOVE:
             guess_y = start_y - 1
-        elif direction == 1:
+        elif direction == Constant.SHOOT_DIRECTION_RIGHT:
             guess_x = start_x + 1
-        elif direction == 2:
+        elif direction == Constant.SHOOT_DIRECTION_BOTTOM:
             guess_y = start_y + 1
-        elif direction == 3:
+        elif direction == Constant.SHOOT_DIRECTION_BOTTOM:
             guess_x = start_x - 1
 
         if guess_x < 0 or guess_x > Constant.DEFAULT_BOARD_WIDTH or guess_y < 0 or guess_y > Constant.DEFAULT_BOARD_HEIGHT:
@@ -88,23 +90,22 @@ class AIShoot:
         return {"guess_pos": guess_pos, "direction": direction, "ai_stage": 4}
 
     def opposite_shoot(self, board, start_x, start_y, direction):
-        utils = Utils()
         guess_x = 0
         guess_y = 0
-        # TODO consider later
+
         line_x = start_x
         line_y = start_y
 
-        if direction == 0:
+        if direction == Constant.SHOOT_DIRECTION_ABOVE:
             guess_y = start_y + 1
             line_y += 1
-        elif direction == 1:
+        elif direction == Constant.SHOOT_DIRECTION_RIGHT:
             guess_x = start_x - 1
             line_x -= 1
-        elif direction == 2:
+        elif direction == Constant.SHOOT_DIRECTION_BOTTOM:
             guess_y = start_y - 1
             line_y -= 1
-        elif direction == 3:
+        elif direction == Constant.SHOOT_DIRECTION_LEFT:
             guess_x = start_x + 1
             line_x += 1
 
@@ -126,26 +127,26 @@ class AIShoot:
 
         last_hit_len = len(ship_hitting_postion)
         if last_hit_len < 4:
-            if direction == 0:
+            if direction == Constant.SHOOT_DIRECTION_ABOVE:
                 guess_y = last_hit_y - last_hit_len
-            elif direction == 1:
+            elif direction == Constant.SHOOT_DIRECTION_RIGHT:
                 guess_x = last_hit_x + last_hit_len
-            elif direction == 2:
+            elif direction == Constant.SHOOT_DIRECTION_BOTTOM:
                 guess_y = last_hit_y + last_hit_len
-            elif direction == 3:
+            elif direction == Constant.SHOOT_DIRECTION_LEFT:
                 guess_x = last_hit_x - last_hit_len
 
         if last_hit_len == 4: #CV
-            if direction == 0:
+            if direction == Constant.SHOOT_DIRECTION_ABOVE:
                 guess_x = last_hit_x - 1
                 guess_y = last_hit_y - 2
-            elif direction == 1:
+            elif direction == Constant.SHOOT_DIRECTION_RIGHT:
                 guess_x = last_hit_x + 1
                 guess_y = last_hit_y - 1
-            elif direction == 2:
+            elif direction == Constant.SHOOT_DIRECTION_BOTTOM:
                 guess_x = last_hit_x - 1
                 guess_y = last_hit_y + 1
-            elif direction == 3:
+            elif direction == Constant.SHOOT_DIRECTION_LEFT:
                 guess_x = last_hit_x - 2
                 guess_y = last_hit_y - 1
 
@@ -169,36 +170,36 @@ class AIShoot:
         last_hit_len = len(ship_hitting_postion)
         if hit_status == Constant.SHOT_STATUS_HIT:
             if last_hit_len < 4:
-                if direction == 0:
+                if direction == Constant.SHOOT_DIRECTION_ABOVE:
                     guess_y = last_hit_y - 1
-                elif direction == 1:
+                elif direction == Constant.SHOOT_DIRECTION_RIGHT:
                     guess_x = last_hit_x + 1
-                elif direction == 2:
+                elif direction == Constant.SHOOT_DIRECTION_BOTTOM:
                     guess_y = last_hit_y + 1
-                elif direction == 3:
+                elif direction == Constant.SHOOT_DIRECTION_LEFT:
                     guess_x = last_hit_x - 1
         else:
             # shoot opposite
             if last_hit_len < 4:
-                if direction == 0:
+                if direction == Constant.SHOOT_DIRECTION_ABOVE:
                     guess_y = last_hit_y + last_hit_len
-                elif direction == 1:
+                elif direction == Constant.SHOOT_DIRECTION_RIGHT:
                     guess_x = last_hit_x - last_hit_len
-                elif direction == 2:
+                elif direction == Constant.SHOOT_DIRECTION_BOTTOM:
                     guess_y = last_hit_y - last_hit_len
-                elif direction == 3:
+                elif direction == Constant.SHOOT_DIRECTION_LEFT:
                     guess_x = last_hit_x + last_hit_len
             elif last_hit_len == 4: #CV
-                if direction == 0:
+                if direction == Constant.SHOOT_DIRECTION_ABOVE:
                     guess_x = last_hit_x - 1
                     guess_y = last_hit_y + 1
-                elif direction == 1:
+                elif direction == Constant.SHOOT_DIRECTION_RIGHT:
                     guess_x = last_hit_x - 2
                     guess_y = last_hit_y - 1
-                elif direction == 2:
+                elif direction == Constant.SHOOT_DIRECTION_BOTTOM:
                     guess_x = last_hit_x - 1
                     guess_y = last_hit_y - 2
-                elif direction == 3:
+                elif direction == Constant.SHOOT_DIRECTION_LEFT:
                     guess_x = last_hit_x + 1
                     guess_y = last_hit_y - 1
 

@@ -2,7 +2,6 @@ from flask import Flask, request, jsonify, session, Response
 from constant import Constant
 from utils import Utils
 from copy import deepcopy
-from random import randint
 import json as simplejson
 from aishoot import AIShoot
 
@@ -11,7 +10,7 @@ app.secret_key="my secret key"
 
 
 @app.route("/")
-def hello():
+def default():
     return "Hello World!"
 
 
@@ -19,8 +18,8 @@ def hello():
 def invite():
     session_id = request.headers['X-SESSION-ID']
     token = request.headers['X-TOKEN']
-    # get request value from game engine
 
+    # get request value from game engine
     try:
         board_width = request.json["boardWidth"]
     except Exception:
@@ -32,18 +31,18 @@ def invite():
     except Exception:
         board_height = Constant.DEFAULT_BOARD_HEIGHT
 
+    # get number of ship from game engine
     ships = request.json["ships"]
 
-    print(type(ships), ships)
-    #TODO
+    # clear session to make sure all old session is cleared
     session.clear()
 
-    # store init game informations to session
+    # store init game information to session
     session[Constant.SESSION_KEY_BOARD_WIDTH] = board_width
     session[Constant.SESSION_KEY_BOARD_HEIGHT] = board_height
     session[Constant.SESSION_KEY_INVITE_SHIPS] = ships
     # init ai stage shoot
-    session[Constant.SESSION_KEY_AI_STAGE] = 1 # Random
+    session[Constant.SESSION_KEY_AI_STAGE] = Constant.AI_STAGE_RANDOM_SHOOT # Random
     session["previous_status"] = -1
     session["current_direction"] = -1
     session["ship_hitting_position"] = []
@@ -55,29 +54,23 @@ def invite():
     resp.headers['X-TOKEN'] = token
     return resp
 
+
 @app.route("/place-ships", methods=["POST"])
 def place_ships():
     utils = Utils()
     session_id = request.headers['X-SESSION-ID']
     token = request.headers['X-TOKEN']
 
-    # get information from request
-    player1 = request.json["player1"]
-    player2 = request.json["player2"]
-
-    # get information from session
-    board_width = session[Constant.SESSION_KEY_BOARD_WIDTH]
-    board_height = session[Constant.SESSION_KEY_BOARD_HEIGHT]
+    # get init ship information
     ships = session[Constant.SESSION_KEY_INVITE_SHIPS]
     print(type(ships), ships)
 
-    #init board
-    #TODO
+    # init board
     board = []
     for x in range(Constant.DEFAULT_BOARD_HEIGHT):
         board.append([Constant.OCEAN] * Constant.DEFAULT_BOARD_WIDTH)
 
-    # store oppnent board
+    # store opponent board
     opponent_board = deepcopy(board)
     session[Constant.SESSION_KEY_OPPONENT_BOARD] = opponent_board
 
@@ -116,9 +109,10 @@ def shoot():
     # counter for turn in session
     turn = request.json["turn"]
     session["turn"] = turn
-    aishoot = AIShoot()
+    ai_shoot = AIShoot()
 
-    try: 
+    try:
+        # get maximum shot from game engine
         max_shots = request.json["maxShots"]
     except Exception:
         max_shots = 1
@@ -128,13 +122,10 @@ def shoot():
         ai_stage = session[Constant.SESSION_KEY_AI_STAGE]
         print("SHOOT: ai_stage before shoot", ai_stage)
         previous_status = session["previous_status"]
-        # when line shot miss then change ai to circle
-        # if previous_status == Constant.SHOT_STATUS_MISS and ai_stage == Constant.AI_STAGE_LINE_SHOOT:
-        #     print("change from line => circle")
-        #     ai_stage == Constant.AI_STAGE_CIRCLE_SHOOT
+
         # Hunt mode
         if ai_stage == Constant.AI_STAGE_RANDOM_SHOOT:
-            shoot_info = aishoot.random_shoot(opponent_board)
+            shoot_info = ai_shoot.random_shoot(opponent_board)
 
             guess_pos = shoot_info["guess_pos"]
             guess_x = guess_pos[0]
@@ -147,7 +138,7 @@ def shoot():
             target_x = ship_postion[0]
             target_y = ship_postion[1]
 
-            pos = aishoot.circle_shoot(opponent_board, target_x, target_y)
+            pos = ai_shoot.circle_shoot(opponent_board, target_x, target_y)
             guess_pos = pos["guess_pos"]
             guess_x = guess_pos[0]
             guess_y = guess_pos[1]
@@ -165,7 +156,7 @@ def shoot():
             
             current_direction = session["current_direction"]
 
-            shoot_info = aishoot.line_shoot(opponent_board, target_x, target_y, current_direction)
+            shoot_info = ai_shoot.line_shoot(opponent_board, target_x, target_y, current_direction)
             guess_pos = shoot_info["guess_pos"]
             guess_x = guess_pos[0]
             guess_y = guess_pos[1]
@@ -182,7 +173,7 @@ def shoot():
 
             current_direction = session["current_direction"]
 
-            shoot_info = aishoot.opposite_shoot(opponent_board, target_x, target_y, current_direction)
+            shoot_info = ai_shoot.opposite_shoot(opponent_board, target_x, target_y, current_direction)
             guess_pos = shoot_info["guess_pos"]
             guess_x = guess_pos[0]
             guess_y = guess_pos[1]
@@ -196,12 +187,12 @@ def shoot():
             ship_hitting_position = session["ship_hitting_position"]
             last_hit_postion = session["hit_ship_position"]
             print(ship_hitting_position,last_hit_postion)
+
+            # guess direction of shoot
             guess_direction = utils.guess_ship_orientation_v1(ship_hitting_position, last_hit_postion)
-            print(guess_direction)
 
-            print(session["previous_status"])
-
-            shoot_info = aishoot.scan_shoot_v1(opponent_board, last_hit_postion[0], last_hit_postion[1], guess_direction,
+            # scan shoot
+            shoot_info = ai_shoot.scan_shoot_v1(opponent_board, last_hit_postion[0], last_hit_postion[1], guess_direction,
                                ship_hitting_position, session["previous_status"])
             guess_pos = shoot_info["guess_pos"]
             print(guess_pos)
@@ -219,10 +210,9 @@ def shoot():
         ret_shots.append(ret_shot)
 
     session[Constant.SESSION_KEY_OPPONENT_BOARD] = opponent_board
-    #session[Constant.SESSION_KEY_AI_BOARD] = ai_board
 
+    # return data to client
     js = simplejson.dumps({"coordinates" : ret_shots})
-
     resp = Response(js, status=200, mimetype='application/json')
     resp.headers['X-SESSION-ID'] = session_id
     resp.headers['X-TOKEN'] = token
@@ -236,7 +226,6 @@ def notify():
     token = request.headers['X-TOKEN']
 
     player_id = request.json["playerId"]
-    aishoot = AIShoot()
     print("Player: ", player_id)
     if player_id == Constant.MY_NAME:
         shots = request.json["shots"]
@@ -264,7 +253,7 @@ def notify():
                 # update HIT value into board
                 opponent_board[coordinate[1]][coordinate[0]] = Constant.HIT
 
-                # TODO determine next ai stage shoot
+                # determine next ai stage shoot
                 ai_stage = session[Constant.SESSION_KEY_AI_STAGE]
                 if ai_stage == Constant.AI_STAGE_RANDOM_SHOOT:
                     print("HIT: change random => circle")
@@ -279,8 +268,7 @@ def notify():
                         session[Constant.SESSION_KEY_AI_STAGE] = Constant.AI_STAGE_LINE_SHOOT
 
 
-                # analysis sunk ship
-                # if has not sunk ship then not random
+                # analysis sunk ship if has not sunk ship then not random
                 if len(sunk_ships) > 0:
                     for sunk_ship in sunk_ships:
                         print("HIT: has sunk ship")

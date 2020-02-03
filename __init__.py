@@ -1,4 +1,4 @@
 from constant import Constant
 from utils import *
-from ships import *
+from models import *
 from aishoot import *
