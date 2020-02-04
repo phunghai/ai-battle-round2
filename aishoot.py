@@ -14,10 +14,11 @@ class AIShoot:
         guess_pos = [guess_x, guess_y]
         return {"guess_pos": guess_pos, "direction": -1, "ai_stage": Constant.AI_STAGE_RANDOM_SHOOT}
 
-
     def circle_shoot(self, board, start_x, start_y):
         utils = Utils()
-        directions = [Constant.SHOOT_DIRECTION_ABOVE, Constant.SHOOT_DIRECTION_RIGHT, Constant.SHOOT_DIRECTION_BOTTOM, Constant.SHOOT_DIRECTION_LEFT] # 0: above, 1: right, 2: bottom, 3: left
+        # 0: above, 1: right, 2: bottom, 3: left
+        directions = [Constant.SHOOT_DIRECTION_ABOVE, Constant.SHOOT_DIRECTION_RIGHT,
+                      Constant.SHOOT_DIRECTION_BOTTOM, Constant.SHOOT_DIRECTION_LEFT]
 
         if start_x == 0:
             directions.remove(Constant.SHOOT_DIRECTION_LEFT) # can not shot at left side
@@ -43,7 +44,7 @@ class AIShoot:
         guess_x = start_x
         guess_y = start_y
 
-        if len(directions) > 0:
+        if directions:
             guess_spot = randint(0, len(directions) - 1)
             direction = directions[guess_spot]
 
@@ -157,7 +158,6 @@ class AIShoot:
             shoot_info = self.circle_shoot(board, last_hit_x, last_hit_y)
             return {"guess_pos": shoot_info["guess_pos"], "direction": shoot_info["direction"],
                     "ai_stage": Constant.AI_STAGE_CIRCLE_SHOOT}
-
 
         guess_pos = [guess_x, guess_y]
         return {"guess_pos": guess_pos, "direction": direction, "ai_stage": Constant.AI_STAGE_SCAN_SHOOT}
