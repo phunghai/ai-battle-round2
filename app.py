@@ -1,9 +1,11 @@
-from copy import deepcopy
 import json as simplejson
+from copy import deepcopy
+
 from flask import Flask, request, jsonify, session, Response
+
+from aishoot import AIShoot
 from constant import Constant
 from utils import Utils
-from aishoot import AIShoot
 
 app = Flask(__name__)
 app.secret_key = "my secret key"
@@ -24,7 +26,6 @@ def invite():
         board_width = request.json["boardWidth"]
     except Exception:
         board_width = Constant.DEFAULT_BOARD_WIDTH
-
 
     try:
         board_height = request.json["boardHeight"]
@@ -128,7 +129,7 @@ def shoot():
             guess_y = guess_pos[1]
             session["previous_guess_x"] = guess_x
             session["previous_guess_y"] = guess_y
-        elif ai_stage == Constant.AI_STAGE_CIRCLE_SHOOT: #circle
+        elif ai_stage == Constant.AI_STAGE_CIRCLE_SHOOT:  # circle
             # based on previous hit
             ship_position = session["hit_ship_position"]
             target_x = ship_position[0]
@@ -144,7 +145,7 @@ def shoot():
             session["previous_guess_x"] = guess_x
             session["previous_guess_y"] = guess_y
             session[Constant.SESSION_KEY_AI_STAGE] = Constant.AI_STAGE_CIRCLE_SHOOT
-        elif ai_stage == Constant.AI_STAGE_LINE_SHOOT: #line shoot
+        elif ai_stage == Constant.AI_STAGE_LINE_SHOOT:  # line shoot
             ship_position = session["hit_ship_position"]
             target_x = ship_position[0]
             target_y = ship_position[1]
@@ -178,33 +179,27 @@ def shoot():
             print("SHOT: SCAN SHOOT -------------- START ")
             ship_hitting_position = session["ship_hitting_position"]
             last_hit_position = session["hit_ship_position"]
-            print(ship_hitting_position, last_hit_position)
 
             # guess direction of shoot
             guess_direction = utils.guess_ship_orientation_v1(ship_hitting_position, last_hit_position)
 
             # scan shoot
-            shoot_info = ai_shoot.scan_shoot_v1(opponent_board, last_hit_position[0], last_hit_position[1], guess_direction,
-                                                ship_hitting_position, session["previous_status"])
+            shoot_info = ai_shoot.scan_shoot_v1(opponent_board, last_hit_position[0], last_hit_position[1],
+                                                guess_direction, ship_hitting_position, session["previous_status"])
             guess_pos = shoot_info["guess_pos"]
-            print(guess_pos)
             guess_x = guess_pos[0]
             guess_y = guess_pos[1]
             session[Constant.SESSION_KEY_AI_STAGE] = shoot_info["ai_stage"]
             session["current_direction"] = shoot_info["direction"]
             session["previous_guess_x"] = guess_x
             session["previous_guess_y"] = guess_y
-            print("SHOT: SCAN SHOOT -------------- END ")
-        print("shooted: ", guess_x, guess_y)
-        print("ai_state", ai_stage)
-        print(session["current_direction"])
         ret_shot = [guess_x, guess_y]
         ret_shots.append(ret_shot)
 
     session[Constant.SESSION_KEY_OPPONENT_BOARD] = opponent_board
 
     # return data to client
-    resp_json = simplejson.dumps({"coordinates" : ret_shots})
+    resp_json = simplejson.dumps({"coordinates": ret_shots})
     resp = Response(resp_json, status=200, mimetype='application/json')
     resp.headers['X-SESSION-ID'] = request.headers['X-SESSION-ID']
     resp.headers['X-TOKEN'] = request.headers['X-TOKEN']
@@ -214,9 +209,6 @@ def shoot():
 @app.route("/notify", methods=["POST"])
 def notify():
     utils = Utils()
-    session_id = request.headers['X-SESSION-ID']
-    token = request.headers['X-TOKEN']
-
     player_id = request.json["playerId"]
     print("Player: ", player_id)
     if player_id == Constant.MY_NAME:
@@ -278,16 +270,18 @@ def notify():
                 session["previous_status"] = Constant.SHOT_STATUS_MISS
 
                 ship_hitting_position = session["ship_hitting_position"]
-                if len(ship_hitting_position) > 1:
-                    if len(sunk_ships) == 0:
+                ship_hitting_position_len = len(ship_hitting_position)
+                if ship_hitting_position_len > 1:
+                    if not sunk_ships:
                         session[Constant.SESSION_KEY_AI_STAGE] = Constant.AI_STAGE_SCAN_SHOOT
 
     # return response to game engine
     resp_json = simplejson.dumps({"message": "successful"})
 
     resp = Response(resp_json, status=200, mimetype='application/json')
-    resp.headers['X-SESSION-ID'] = session_id
-    resp.headers['X-TOKEN'] = token
+    resp.headers['X-SESSION-ID'] = request.headers['X-SESSION-ID']
+    resp.headers['X-TOKEN'] = request.headers['X-TOKEN']
+
     return resp
 
 
@@ -297,4 +291,5 @@ def game_over():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=80, debug=True)
+    # app.run(host='0.0.0.0', port=80, debug=True)
+    app.run(debug=True)

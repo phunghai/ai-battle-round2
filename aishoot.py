@@ -1,4 +1,5 @@
 from random import randint
+
 from constant import Constant
 from utils import Utils
 
@@ -21,7 +22,7 @@ class AIShoot:
                       Constant.SHOOT_DIRECTION_BOTTOM, Constant.SHOOT_DIRECTION_LEFT]
 
         if start_x == 0:
-            directions.remove(Constant.SHOOT_DIRECTION_LEFT) # can not shot at left side
+            directions.remove(Constant.SHOOT_DIRECTION_LEFT)  # can not shot at left side
         elif not utils.is_ocean(start_x - 1, start_y, board):
             directions.remove(Constant.SHOOT_DIRECTION_LEFT)
 
@@ -65,7 +66,7 @@ class AIShoot:
 
         return {"guess_pos": [guess_x, guess_y], "direction": direction}
 
-    def line_shoot(self, board, start_x, start_y, direction): # checkeds
+    def line_shoot(self, board, start_x, start_y, direction):  # checkeds
         utils = Utils()
         guess_x = start_x
         guess_y = start_y
@@ -79,9 +80,11 @@ class AIShoot:
         elif direction == Constant.SHOOT_DIRECTION_BOTTOM:
             guess_x = start_x - 1
 
-        if guess_x < 0 or guess_x > Constant.DEFAULT_BOARD_WIDTH or guess_y < 0 or guess_y > Constant.DEFAULT_BOARD_HEIGHT:
+        if guess_x < 0 or guess_x > Constant.DEFAULT_BOARD_WIDTH \
+                or guess_y < 0 or guess_y > Constant.DEFAULT_BOARD_HEIGHT:
             shoot_info = self.random_shoot(board)
-            return {"guess_pos": shoot_info["guess_pos"], "direction": shoot_info["direction"], "ai_stage": shoot_info["ai_stage"]}
+            return {"guess_pos": shoot_info["guess_pos"], "direction": shoot_info["direction"],
+                    "ai_stage": shoot_info["ai_stage"]}
         elif not utils.is_ocean(guess_x, guess_y, board):
             shoot_info = self.circle_shoot(board, start_x, start_y)
             return {"guess_pos": shoot_info["guess_pos"], "direction": shoot_info["direction"],
@@ -110,7 +113,8 @@ class AIShoot:
             guess_x = start_x + 1
             line_x += 1
 
-        if guess_x < 0 or guess_x > Constant.DEFAULT_BOARD_WIDTH or guess_y < 0 or guess_y > Constant.DEFAULT_BOARD_HEIGHT:
+        if guess_x < 0 or guess_x > Constant.DEFAULT_BOARD_WIDTH \
+                or guess_y < 0 or guess_y > Constant.DEFAULT_BOARD_HEIGHT:
             guess_pos = self.random_shoot(board)
             guess_x = guess_pos[0]
             guess_y = guess_pos[1]
@@ -121,47 +125,6 @@ class AIShoot:
 
         return [guess_x, guess_y]
 
-    def scan_shoot(self, board, last_hit_x, last_hit_y, direction, ship_hitting_postion):
-        utils = Utils()
-        guess_x = last_hit_x
-        guess_y = last_hit_y
-
-        last_hit_len = len(ship_hitting_postion)
-        if last_hit_len < 4:
-            if direction == Constant.SHOOT_DIRECTION_ABOVE:
-                guess_y = last_hit_y - last_hit_len
-            elif direction == Constant.SHOOT_DIRECTION_RIGHT:
-                guess_x = last_hit_x + last_hit_len
-            elif direction == Constant.SHOOT_DIRECTION_BOTTOM:
-                guess_y = last_hit_y + last_hit_len
-            elif direction == Constant.SHOOT_DIRECTION_LEFT:
-                guess_x = last_hit_x - last_hit_len
-
-        if last_hit_len == 4: #CV
-            if direction == Constant.SHOOT_DIRECTION_ABOVE:
-                guess_x = last_hit_x - 1
-                guess_y = last_hit_y - 2
-            elif direction == Constant.SHOOT_DIRECTION_RIGHT:
-                guess_x = last_hit_x + 1
-                guess_y = last_hit_y - 1
-            elif direction == Constant.SHOOT_DIRECTION_BOTTOM:
-                guess_x = last_hit_x - 1
-                guess_y = last_hit_y + 1
-            elif direction == Constant.SHOOT_DIRECTION_LEFT:
-                guess_x = last_hit_x - 2
-                guess_y = last_hit_y - 1
-
-        if guess_x < 0 or guess_x > Constant.DEFAULT_BOARD_WIDTH or guess_y < 0 or guess_y > Constant.DEFAULT_BOARD_HEIGHT:
-            shoot_info = self.random_shoot(board)
-            return {"guess_pos": shoot_info["guess_pos"], "direction": shoot_info["direction"], "ai_stage": shoot_info["ai_stage"]}
-        elif not utils.is_ocean(guess_x, guess_y, board):
-            shoot_info = self.circle_shoot(board, last_hit_x, last_hit_y)
-            return {"guess_pos": shoot_info["guess_pos"], "direction": shoot_info["direction"],
-                    "ai_stage": Constant.AI_STAGE_CIRCLE_SHOOT}
-
-        guess_pos = [guess_x, guess_y]
-        return {"guess_pos": guess_pos, "direction": direction, "ai_stage": Constant.AI_STAGE_SCAN_SHOOT}
-
     def scan_shoot_v1(self, board, last_hit_x, last_hit_y, direction, ship_hitting_postion, hit_status):
         utils = Utils()
         guess_x = last_hit_x
@@ -169,48 +132,70 @@ class AIShoot:
 
         last_hit_len = len(ship_hitting_postion)
         if hit_status == Constant.SHOT_STATUS_HIT:
-            if last_hit_len < 4:
-                if direction == Constant.SHOOT_DIRECTION_ABOVE:
-                    guess_y = last_hit_y - 1
-                elif direction == Constant.SHOOT_DIRECTION_RIGHT:
-                    guess_x = last_hit_x + 1
-                elif direction == Constant.SHOOT_DIRECTION_BOTTOM:
-                    guess_y = last_hit_y + 1
-                elif direction == Constant.SHOOT_DIRECTION_LEFT:
-                    guess_x = last_hit_x - 1
+            guess_x, guess_y = self._scan_shoot_for_hit_success(last_hit_x, last_hit_y, last_hit_len, direction)
         else:
             # shoot opposite
-            if last_hit_len < 4:
-                if direction == Constant.SHOOT_DIRECTION_ABOVE:
-                    guess_y = last_hit_y + last_hit_len
-                elif direction == Constant.SHOOT_DIRECTION_RIGHT:
-                    guess_x = last_hit_x - last_hit_len
-                elif direction == Constant.SHOOT_DIRECTION_BOTTOM:
-                    guess_y = last_hit_y - last_hit_len
-                elif direction == Constant.SHOOT_DIRECTION_LEFT:
-                    guess_x = last_hit_x + last_hit_len
-            elif last_hit_len == 4: #CV
-                if direction == Constant.SHOOT_DIRECTION_ABOVE:
-                    guess_x = last_hit_x - 1
-                    guess_y = last_hit_y + 1
-                elif direction == Constant.SHOOT_DIRECTION_RIGHT:
-                    guess_x = last_hit_x - 2
-                    guess_y = last_hit_y - 1
-                elif direction == Constant.SHOOT_DIRECTION_BOTTOM:
-                    guess_x = last_hit_x - 1
-                    guess_y = last_hit_y - 2
-                elif direction == Constant.SHOOT_DIRECTION_LEFT:
-                    guess_x = last_hit_x + 1
-                    guess_y = last_hit_y - 1
+            guess_x, guess_y = self._scan_shoot_for_hit_fail(last_hit_x, last_hit_y, last_hit_len, direction)
 
-        if guess_x < 0 or guess_x > Constant.DEFAULT_BOARD_WIDTH or guess_y < 0 or guess_y > Constant.DEFAULT_BOARD_HEIGHT:
+        if guess_x < 0 or guess_x > Constant.DEFAULT_BOARD_WIDTH \
+                or guess_y < 0 or guess_y > Constant.DEFAULT_BOARD_HEIGHT:
             shoot_info = self.random_shoot(board)
-            return {"guess_pos": shoot_info["guess_pos"], "direction": shoot_info["direction"], "ai_stage": shoot_info["ai_stage"]}
+            return {
+                "guess_pos": shoot_info["guess_pos"],
+                "direction": shoot_info["direction"],
+                "ai_stage": shoot_info["ai_stage"]
+            }
         elif not utils.is_ocean(guess_x, guess_y, board):
             shoot_info = self.circle_shoot(board, last_hit_x, last_hit_y)
-            return {"guess_pos": shoot_info["guess_pos"], "direction": shoot_info["direction"],
-                    "ai_stage": Constant.AI_STAGE_CIRCLE_SHOOT}
-
+            return {
+                "guess_pos": shoot_info["guess_pos"],
+                "direction": shoot_info["direction"],
+                "ai_stage": Constant.AI_STAGE_CIRCLE_SHOOT
+            }
 
         guess_pos = [guess_x, guess_y]
         return {"guess_pos": guess_pos, "direction": direction, "ai_stage": Constant.AI_STAGE_SCAN_SHOOT}
+
+    def _scan_shoot_for_hit_success(self, last_hit_x, last_hit_y, last_hit_len, direction):
+        """ Guess new position for next shoot after hit success"""
+        guess_x = last_hit_x
+        guess_y = last_hit_y
+        if last_hit_len < 4:
+            if direction == Constant.SHOOT_DIRECTION_ABOVE:
+                guess_y = last_hit_y - 1
+            elif direction == Constant.SHOOT_DIRECTION_RIGHT:
+                guess_x = last_hit_x + 1
+            elif direction == Constant.SHOOT_DIRECTION_BOTTOM:
+                guess_y = last_hit_y + 1
+            elif direction == Constant.SHOOT_DIRECTION_LEFT:
+                guess_x = last_hit_x - 1
+        return guess_x, guess_y
+
+    def _scan_shoot_for_hit_fail(self, last_hit_x, last_hit_y, last_hit_len, direction):
+        """ Guess new position for next shoot after hit failure"""
+        guess_x = last_hit_x
+        guess_y = last_hit_y
+
+        if last_hit_len < 4:
+            if direction == Constant.SHOOT_DIRECTION_ABOVE:
+                guess_y = last_hit_y + last_hit_len
+            elif direction == Constant.SHOOT_DIRECTION_RIGHT:
+                guess_x = last_hit_x - last_hit_len
+            elif direction == Constant.SHOOT_DIRECTION_BOTTOM:
+                guess_y = last_hit_y - last_hit_len
+            elif direction == Constant.SHOOT_DIRECTION_LEFT:
+                guess_x = last_hit_x + last_hit_len
+        elif last_hit_len == 4:  # CV
+            if direction == Constant.SHOOT_DIRECTION_ABOVE:
+                guess_x = last_hit_x - 1
+                guess_y = last_hit_y + 1
+            elif direction == Constant.SHOOT_DIRECTION_RIGHT:
+                guess_x = last_hit_x - 2
+                guess_y = last_hit_y - 1
+            elif direction == Constant.SHOOT_DIRECTION_BOTTOM:
+                guess_x = last_hit_x - 1
+                guess_y = last_hit_y - 2
+            elif direction == Constant.SHOOT_DIRECTION_LEFT:
+                guess_x = last_hit_x + 1
+                guess_y = last_hit_y - 1
+        return guess_x, guess_y
