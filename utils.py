@@ -1,4 +1,5 @@
 from random import randint
+
 from constant import Constant
 from models import Carrier, Battleship, Cruiser, Destroyer, Oilrig
 
@@ -6,28 +7,23 @@ from models import Carrier, Battleship, Cruiser, Destroyer, Oilrig
 class Utils:
     def random_y(self, is_vertical, size, height, ship_type):
         if is_vertical == Constant.VERTICAL:
-            if ship_type == Constant.SHIP_TYPE_CARRIER  or ship_type == Constant.SHIP_TYPE_OIL_RIG:
+            if ship_type == Constant.SHIP_TYPE_CARRIER or ship_type == Constant.SHIP_TYPE_OIL_RIG:
                 return randint(0, Constant.DEFAULT_BOARD_HEIGHT - size)
-            else:
-                return randint(0, Constant.DEFAULT_BOARD_HEIGHT - 1)
+            return randint(0, Constant.DEFAULT_BOARD_HEIGHT - 1)
         else:
-            if ship_type == Constant.SHIP_TYPE_CARRIER  or ship_type == Constant.SHIP_TYPE_OIL_RIG :
+            if ship_type == Constant.SHIP_TYPE_CARRIER or ship_type == Constant.SHIP_TYPE_OIL_RIG:
                 return randint(height - 1, Constant.DEFAULT_BOARD_HEIGHT - height)
-            else:
-                return randint(0, Constant.DEFAULT_BOARD_HEIGHT - size)
-
+            return randint(0, Constant.DEFAULT_BOARD_HEIGHT - size)
 
     def random_x(self, is_vertical, size, height, ship_type):
         if is_vertical == Constant.VERTICAL:
             if ship_type == Constant.SHIP_TYPE_CARRIER or ship_type == Constant.SHIP_TYPE_OIL_RIG:
-                return randint(height - 1 , Constant.DEFAULT_BOARD_WIDTH - 1)
-            else:
-                return randint(0, Constant.DEFAULT_BOARD_WIDTH - size)
+                return randint(height - 1, Constant.DEFAULT_BOARD_WIDTH - 1)
+            return randint(0, Constant.DEFAULT_BOARD_WIDTH - size)
         else:
             if ship_type == Constant.SHIP_TYPE_CARRIER or ship_type == Constant.SHIP_TYPE_OIL_RIG:
-                return randint(0 , Constant.DEFAULT_BOARD_WIDTH - size)
-            else:
-                return randint(size - 1, Constant.DEFAULT_BOARD_WIDTH - 1)
+                return randint(0, Constant.DEFAULT_BOARD_WIDTH - size)
+            return randint(size - 1, Constant.DEFAULT_BOARD_WIDTH - 1)
 
     def is_ocean(self, x, y, board):  # true if ocean
         if y < 0 or y >= Constant.DEFAULT_BOARD_HEIGHT:
@@ -63,7 +59,7 @@ class Utils:
         :param board:
         :return:
         """
-        is_vertical = randint(0, 1) # vertical ship if true
+        is_vertical = randint(0, 1)  # vertical ship if true
         occupied = True
         ship_type = ship["type"]
         ship_info = Constant.SHIPS_INFO[ship_type]
@@ -109,7 +105,7 @@ class Utils:
         elif direction == Constant.SHOOT_DIRECTION_RIGHT or direction == Constant.SHOOT_DIRECTION_LEFT:
             return Constant.HORIZONTAL
 
-        return -1 #unknow
+        return -1  # unknow
 
     def guess_ship_orientation(self, hit_position):
         x_arr = []
@@ -124,8 +120,8 @@ class Utils:
         sort_y_arr_asc = sorted(y_arr, reverse=False)
         sort_y_arr_desc = sorted(y_arr, reverse=True)
         if sort_x_arr_asc == self.remove_duplicates(x_arr):
-            # horizintal
-            return 3 #EAST
+            # horiziontal
+            return 3  # EAST
         elif sort_x_arr_desc == self.remove_duplicates(x_arr):
             return 1
         elif sort_y_arr_asc == self.remove_duplicates(y_arr):

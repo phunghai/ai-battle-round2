@@ -14,7 +14,7 @@ class Constant:
     SESSION_KEY_INVITE_SHIPS = "SESSION_KEY_INVITE_SHIPS"
     SESSION_KEY_AI_BOARD = "SESSION_KEY_AI_BOARD"
     SESSION_KEY_OPPONENT_BOARD = "SESSION_KEY_OPPONENT_BOARD"
-    SESSION_KEY_AI_STAGE="SESSION_KEY_AI_STAGE"
+    SESSION_KEY_AI_STAGE = "SESSION_KEY_AI_STAGE"
 
     # stage of shoot
     AI_STAGE_RANDOM_SHOOT = 1
@@ -29,11 +29,14 @@ class Constant:
     HIT = "*"
 
     # ship info: ship type is one of 5 type: CV, BB, CA, DD, OR
-    SHIPS_INFO = {"CV": {"width": 4, "height": 2}, "BB": {"width": 4, "height": 1},
-                  "CA": {"width": 3, "height": 1}, "DD": {"width": 2, "height": 1}, "OR": {"width": 2, "height": 2}}
+    SHIPS_INFO = {"CV": {"width": 4, "height": 2},
+                  "BB": {"width": 4, "height": 1},
+                  "CA": {"width": 3, "height": 1},
+                  "DD": {"width": 2, "height": 1},
+                  "OR": {"width": 2, "height": 2}}
     VERTICAL = 0
     HORIZONTAL = 1
-    MY_NAME="calisthenis"
+    MY_NAME = "calisthenis"
 
     # direction of shoot
     SHOOT_DIRECTION_ABOVE = 0
