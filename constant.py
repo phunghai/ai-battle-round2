@@ -44,3 +44,5 @@ class Constant:
     SHOOT_DIRECTION_BOTTOM = 2
     SHOOT_DIRECTION_LEFT = 3
 
+    DEFAULT_MINE_TYPE = 'application/json'
+

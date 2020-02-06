@@ -50,7 +50,7 @@ def invite():
 
     resp_json = simplejson.dumps({"message": "successful"})
 
-    resp = Response(resp_json, status=200, mimetype='application/json')
+    resp = Response(resp_json, status=200, mimetype=Constant.DEFAULT_MINE_TYPE)
     resp.headers['X-SESSION-ID'] = session_id
     resp.headers['X-TOKEN'] = token
     return resp
@@ -93,7 +93,7 @@ def place_ships():
 
     js = simplejson.dumps({"ships": ret_ships})
 
-    resp = Response(js, status=200, mimetype='application/json')
+    resp = Response(js, status=200, mimetype=Constant.DEFAULT_MINE_TYPE)
     resp.headers['X-SESSION-ID'] = session_id
     resp.headers['X-TOKEN'] = token
     return resp
@@ -200,7 +200,7 @@ def shoot():
 
     # return data to client
     resp_json = simplejson.dumps({"coordinates": ret_shots})
-    resp = Response(resp_json, status=200, mimetype='application/json')
+    resp = Response(resp_json, status=200, mimetype=Constant.DEFAULT_MINE_TYPE)
     resp.headers['X-SESSION-ID'] = request.headers['X-SESSION-ID']
     resp.headers['X-TOKEN'] = request.headers['X-TOKEN']
     return resp
@@ -278,7 +278,7 @@ def notify():
     # return response to game engine
     resp_json = simplejson.dumps({"message": "successful"})
 
-    resp = Response(resp_json, status=200, mimetype='application/json')
+    resp = Response(resp_json, status=200, mimetype=Constant.DEFAULT_MINE_TYPE)
     resp.headers['X-SESSION-ID'] = request.headers['X-SESSION-ID']
     resp.headers['X-TOKEN'] = request.headers['X-TOKEN']
 

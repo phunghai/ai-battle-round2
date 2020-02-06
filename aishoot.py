@@ -21,24 +21,16 @@ class AIShoot:
         directions = [Constant.SHOOT_DIRECTION_ABOVE, Constant.SHOOT_DIRECTION_RIGHT,
                       Constant.SHOOT_DIRECTION_BOTTOM, Constant.SHOOT_DIRECTION_LEFT]
 
-        if start_x == 0:
+        if start_x == 0 or not utils.is_ocean(start_x - 1, start_y, board):
             directions.remove(Constant.SHOOT_DIRECTION_LEFT)  # can not shot at left side
-        elif not utils.is_ocean(start_x - 1, start_y, board):
-            directions.remove(Constant.SHOOT_DIRECTION_LEFT)
 
-        if start_x == Constant.DEFAULT_BOARD_WIDTH - 1:
-            directions.remove(Constant.SHOOT_DIRECTION_RIGHT)
-        elif not utils.is_ocean(start_x + 1, start_y, board):
+        if start_x == Constant.DEFAULT_BOARD_WIDTH - 1 or not utils.is_ocean(start_x + 1, start_y, board):
             directions.remove(Constant.SHOOT_DIRECTION_RIGHT)
 
-        if start_y == 0:
-            directions.remove(Constant.SHOOT_DIRECTION_ABOVE)
-        elif not utils.is_ocean(start_x, start_y - 1, board):
+        if start_y == 0 or not utils.is_ocean(start_x, start_y - 1, board):
             directions.remove(Constant.SHOOT_DIRECTION_ABOVE)
 
-        if start_y == Constant.DEFAULT_BOARD_HEIGHT - 1:
-            directions.remove(Constant.SHOOT_DIRECTION_BOTTOM)
-        elif not utils.is_ocean(start_x, start_y + 1, board):
+        if start_y == Constant.DEFAULT_BOARD_HEIGHT - 1 or not utils.is_ocean(start_x, start_y + 1, board):
             directions.remove(Constant.SHOOT_DIRECTION_BOTTOM)
 
         direction = -1
@@ -97,21 +89,14 @@ class AIShoot:
         guess_x = 0
         guess_y = 0
 
-        line_x = start_x
-        line_y = start_y
-
         if direction == Constant.SHOOT_DIRECTION_ABOVE:
             guess_y = start_y + 1
-            line_y += 1
         elif direction == Constant.SHOOT_DIRECTION_RIGHT:
             guess_x = start_x - 1
-            line_x -= 1
         elif direction == Constant.SHOOT_DIRECTION_BOTTOM:
             guess_y = start_y - 1
-            line_y -= 1
         elif direction == Constant.SHOOT_DIRECTION_LEFT:
             guess_x = start_x + 1
-            line_x += 1
 
         if guess_x < 0 or guess_x > Constant.DEFAULT_BOARD_WIDTH \
                 or guess_y < 0 or guess_y > Constant.DEFAULT_BOARD_HEIGHT:
@@ -127,8 +112,6 @@ class AIShoot:
 
     def scan_shoot_v1(self, board, last_hit_x, last_hit_y, direction, ship_hitting_postion, hit_status):
         utils = Utils()
-        guess_x = last_hit_x
-        guess_y = last_hit_y
 
         last_hit_len = len(ship_hitting_postion)
         if hit_status == Constant.SHOT_STATUS_HIT:

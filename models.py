@@ -7,10 +7,9 @@ class BaseShip:
         self.num_row = Constant.DEFAULT_BOARD_HEIGHT
 
     def can_push(self, pos_x, pos_y, board):
-        if pos_x < 0 or pos_x >= self.num_col:
+        if (pos_x < 0 or pos_x >= self.num_col) or (pos_y < 0 or pos_y >= self.num_row):
             return False
-        elif pos_y < 0 or pos_y >= self.num_row:
-            return False
+
         if board[pos_y][pos_x] == Constant.OCEAN:
             return True
         return False
@@ -28,9 +27,6 @@ class BaseShip:
                 print("CAN PUSH", pos_x, pos_y)
 
         return True
-
-    def get_ship(self, start_x, start_y, orientation):
-        pass
 
 
 class Carrier(BaseShip):
