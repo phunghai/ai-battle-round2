@@ -77,7 +77,7 @@ class AIShoot:
             guess_x = start_x + 1
         elif direction == Constant.SHOOT_DIRECTION_BOTTOM:
             guess_y = start_y + 1
-        elif direction == Constant.SHOOT_DIRECTION_BOTTOM:
+        elif direction == Constant.SHOOT_DIRECTION_LEFT:
             guess_x = start_x - 1
 
         if guess_x < 0 or guess_x > Constant.DEFAULT_BOARD_WIDTH \
