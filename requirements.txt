@@ -11,5 +11,5 @@ python-dateutil==2.6.1
 s3transfer==0.1.12
 simplejson==3.13.2
 six==1.11.0
-Werkzeug==0.15.3
+Werkzeug==0.15.5
 gunicorn
